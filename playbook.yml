@@ -1,0 +1,50 @@
+---
+- hosts: all
+  become: yes
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Uploading manifest 
+      shell:  hammer subscription upload  
+        --file /tmp/manifest_satellite-vm.zip 
+        --organization "Default Organization"
+      ignore_errors: yes
+      tags:
+        - satellite
+        - manifest
+        
+    
+    - name: Setting up satellite repository
+      shell:  hammer repository-set enable 
+        --organization "{{item.organization}}" 
+        --product "{{item.product}}" 
+        --basearch "{{item.basearch}}" 
+        --name "{{item.name}}"
+        --releasever "{{item.releasever}}"
+      ignore_errors: yes
+      when: item.releasever is defined
+      loop: "{{ satellite_repository }}"
+      tags:
+        - loop
+
+    - name: Setting up satellite repository
+      shell:  hammer repository-set enable 
+        --organization "{{item.organization}}" 
+        --product "{{item.product}}" 
+        --basearch "{{item.basearch}}" 
+        --name "{{item.name}}"
+      ignore_errors: yes
+      when: item.releasever is not defined
+      loop: "{{ satellite_repository }}"
+      tags:
+        - loop
+    
+    - name: Sync repo
+      shell: hammer repository synchronize 
+        --organization "{{item.organization}}" 
+        --product "{{item.product}}" 
+        --name "{{item.sync_name}}"
+        --async
+      loop: "{{ satellite_repository }}"
+      tags:
+        - sync
