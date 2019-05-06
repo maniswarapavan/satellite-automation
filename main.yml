@@ -1,4 +1,9 @@
 ---
+- hosts: all
+  become: yes
+  vars_files: 
+    - vars.yml
+  tasks:
 # - name: Subscription list 
 #   shell: hammer --output cve subscription list --organization "{{ORG}}"
 #   register: subscription_list
@@ -13,13 +18,8 @@
 #     - satellite_configuration
 #     - manifest
 # 
-- hosts: all
-  become: yes
-  vars_files: 
-    - vars.yml
-  tasks:
-    - include: 02_repository.yml
-# - include: 03_content_view.yml
+    #- include: 02_repository.yml
+    - include: 03_content_view.yml
 # - include: 04_lifecycle.yml
 # - include: 05_activationkey.yml
 
