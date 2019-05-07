@@ -40,8 +40,8 @@
 
 - name: Create facts with list existing repos in content view 
   set_fact: 
-    content_view_repos_exist: "{{ content_view_repos_exist + [item.split(':')[1].split(',').lstrip(' ')]}}"
-  loop: "{{content_view_repos_list.stdout_lines}}"
+    content_view_repos_exist: "{{ content_view_repos_exist + [item.split(':')[1].split(',')]}}"
+  loop: "{{ content_view_repos_list.stdout_lines }}"
 
 - name: list existing repos in content view 
   debug: var=content_view_repos_exist
