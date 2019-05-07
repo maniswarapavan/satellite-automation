@@ -1,61 +1,67 @@
 ---
-- name: List content views
-  shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
-  register: content_view_list
-
-- name: Create list of existing content view
-  set_fact: 
-    content_view_exist: "{{ content_view_exist + [item.split(':')[1].lstrip(' ')]}}"
-  loop: "{{content_view_list.stdout_lines}}"
-
-- debug: var=content_view_exist
-- name: Create Content-view
-  shell: hammer content-view create --name "{{CONTENT_VIEW_NAME}}"  --organization "{{ORG}}"
-  when: CONTENT_VIEW_NAME not in content_view_exist
-  tags:
-    - satellite_configuration
-    - content-view
+# - name: List content views
+#   shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
+#   register: content_view_list
+# 
+# - name: Create list of existing content view
+#   set_fact: 
+#     content_view_exist: "{{ content_view_exist + [item.split(':')[1].lstrip(' ')]}}"
+#   loop: "{{content_view_list.stdout_lines}}"
+# 
+# - debug: var=content_view_exist
+# - name: Create Content-view
+#   shell: hammer content-view create --name "{{CONTENT_VIEW_NAME}}"  --organization "{{ORG}}"
+#   when: CONTENT_VIEW_NAME not in content_view_exist
+#   tags:
+#     - satellite_configuration
+#     - content-view
 #######################################
 - name: Listing repository
-  shell:  'hammer --output json  repository list --organization "{{ORG}}" |grep Id'
+  shell:  'hammer --output cve  repository list --organization "{{ORG}}" |grep Id'
   register: repo_list
   tags: 
     - satellite_configuration
     - content-view
+- debug: var=item.split(':')[1].lstrip(' ')
+  loop: "{{repo_list.stdout_lines}}"
 
+- name: Creating list of enabled repo in subscriptiong 
+  set_fact:
+    item.split(':')[1].lstrip(' ')
+  loop: "{{repo_list.stdout_lines}}"
 - name: List content views repos
   shell: hammer --output cve content-view list --organization "{{ORG}}" --name  "{{CONTENT_VIEW_NAME}}" |grep "Repository IDs"
   register: content_view_repos_list
 
+- debug: var=content_view_repos_list.stdout_lines
+
 - debug: 
     var: content_view_repos_list.stdout_lines.0.split(':')
-- set_fact:
-    test: "{{content_view_repos_list.stdout_lines.0.split(':')}}"
+
 - name: Create facts for existing content view repos
   set_fact: 
-    content_view_repos_exist: "{{ content_view_repos_exist + [item[1].lstrip(' ')]}}"
-  loop: "{{content_view_repos_list.stdout_lines.0.split(':')}}"
+    content_view_repos_exist: "{{ content_view_repos_exist + [item.split(':')[1].split(',')]}}"
+  loop: "{{content_view_repos_list.stdout_lines}}"
 
 - debug: var=content_view_repos_exist
 
-- pause:
-- name: adding repo to content-view
-  shell: hammer content-view add-repository
-      --organization "{{ORG}}"
-      --name "{{CONTENT_VIEW_NAME}}"
-      --repository-id  "{{ item.split(':')[1].lstrip(' ') }}"
-  when: item not in content_view_repos_exist
-  loop: "{{repo_list.stdout_lines}}"
-  ignore_errors: yes
-  tags: 
-    - satellite_configuration
-    - content-view
-
-- name: Publishing content-view
-  shell: hammer content-view publish
-      --organization "{{ORG}}"
-      --name "{{CONTENT_VIEW_NAME}}"
-      --async
-  tags: 
-    - satellite_configuration
-    - content-view
+# - name: adding repo to content-view
+#   shell: hammer content-view add-repository
+#       --organization "{{ORG}}"
+#       --name "{{CONTENT_VIEW_NAME}}"
+#       --repository-id  "{{ item.split(':')[1].lstrip(' ') }}"
+#   when: item.split(':')[1].lstrip(' ')  not in content_view_repos_exist
+#   loop: "{{repo_list.stdout_lines}}"
+#   ignore_errors: yes
+#   tags: 
+#     - satellite_configuration
+#     - content-view
+# 
+# - name: Publishing content-view
+#   shell: hammer content-view publish
+#       --organization "{{ORG}}"
+#       --name "{{CONTENT_VIEW_NAME}}"
+#       --async
+#   tags: 
+#     - satellite_configuration
+#     - content-view
