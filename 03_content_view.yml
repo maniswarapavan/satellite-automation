@@ -22,46 +22,46 @@
   tags: 
     - satellite_configuration
     - content-view
-- debug: var=item.split(':')[1].lstrip(' ')
+- debug: 
+    msg: "{{ item.split(':')[1].lstrip(' ')}}"
   loop: "{{repo_list.stdout_lines}}"
 
-- name: Creating list of enabled repo in subscriptiong 
+- name: Creating list of enabled repo ID in subscription
   set_fact:
-    item.split(':')[1].lstrip(' ')
+    sub_repos_name_exist: "{{ sub_repos_name_exist + [ item.split(':')[1].lstrip(' ')] }}"
   loop: "{{repo_list.stdout_lines}}"
-- name: List content views repos
+
+- debug: var=sub_repos_name_exist
+
+- name: List content views repo ID
   shell: hammer --output cve content-view list --organization "{{ORG}}" --name  "{{CONTENT_VIEW_NAME}}" |grep "Repository IDs"
   register: content_view_repos_list
 
 - debug: var=content_view_repos_list.stdout_lines
 
-- debug: 
-    var: content_view_repos_list.stdout_lines.0.split(':')
-
 - name: Create facts for existing content view repos
   set_fact: 
-    content_view_repos_exist: "{{ content_view_repos_exist + [item.split(':')[1].split(',')]}}"
+    content_view_repos_exist: "{{ content_view_repos_exist + [item.split(':')[1].split(',').lstrip(' ')]}}"
   loop: "{{content_view_repos_list.stdout_lines}}"
 
 - debug: var=content_view_repos_exist
 
-# - name: adding repo to content-view
-#   shell: hammer content-view add-repository
-#       --organization "{{ORG}}"
-#       --name "{{CONTENT_VIEW_NAME}}"
-#       --repository-id  "{{ item.split(':')[1].lstrip(' ') }}"
-#   when: item.split(':')[1].lstrip(' ')  not in content_view_repos_exist
-#   loop: "{{repo_list.stdout_lines}}"
-#   ignore_errors: yes
-#   tags: 
-#     - satellite_configuration
-#     - content-view
-# 
-# - name: Publishing content-view
-#   shell: hammer content-view publish
-#       --organization "{{ORG}}"
-#       --name "{{CONTENT_VIEW_NAME}}"
-#       --async
-#   tags: 
-#     - satellite_configuration
-#     - content-view
+- name: adding repo to content-view
+  shell: hammer content-view add-repository
+      --organization "{{ORG}}"
+      --name "{{CONTENT_VIEW_NAME}}"
+      --repository-id  "{{ item }}"
+  when: item  not in sub_repos_name_exist 
+  loop: "{{  content_view_repos_exist }}"
+  tags: 
+    - satellite_configuration
+    - content-view
+
+- name: Publishing content-view
+  shell: hammer content-view publish
+      --organization "{{ORG}}"
+      --name "{{CONTENT_VIEW_NAME}}"
+      --async
+  tags: 
+    - satellite_configuration
+    - content-view
