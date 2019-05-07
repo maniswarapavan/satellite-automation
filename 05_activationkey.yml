@@ -1,5 +1,13 @@
 ---
+- name: Fetching Name list of existing Activation Keys
+  shell: hammer --output cve activation-key list --organization {{ORG}} |grep Name
+  register: activation_key_list
 
+- name: Creating fact from Name list of existing Activation Keys
+  set_fact:
+    activation_key_exist:
+  loop: "{{activation_key_list}}"
+  loop: 
 - name: Creating Activiation Key
   shell:  hammer activation-key create 
       --organization "{{ORG}}"

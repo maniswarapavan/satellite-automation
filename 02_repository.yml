@@ -50,6 +50,7 @@
     --name "{{item.sync_name}}"
     --async
   loop: "{{ satellite_repository }}"
+  ignore_errors: yes
   tags:
     - satellite_configuration
 
