@@ -1,20 +1,20 @@
 ---
-# - name: List content views
-#   shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
-#   register: content_view_list
-# 
-# - name: Create list of existing content view
-#   set_fact: 
-#     content_view_exist: "{{ content_view_exist + [item.split(':')[1].lstrip(' ')]}}"
-#   loop: "{{content_view_list.stdout_lines}}"
-# 
-# - debug: var=content_view_exist
-# - name: Create Content-view
-#   shell: hammer content-view create --name "{{CONTENT_VIEW_NAME}}"  --organization "{{ORG}}"
-#   when: CONTENT_VIEW_NAME not in content_view_exist
-#   tags:
-#     - satellite_configuration
-#     - content-view
+- name: List content views
+  shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
+  register: content_view_list
+
+- name: Create list of existing content view
+  set_fact: 
+    content_view_exist: "{{ content_view_exist + [item.split(':')[1].lstrip(' ')]}}"
+  loop: "{{content_view_list.stdout_lines}}"
+
+- debug: var=content_view_exist
+- name: Create Content-view
+  shell: hammer content-view create --name "{{CONTENT_VIEW_NAME}}"  --organization "{{ORG}}"
+  when: CONTENT_VIEW_NAME not in content_view_exist
+  tags:
+    - satellite_configuration
+    - content-view
 #######################################
 - name: Listing repository
   shell:  'hammer --output cve  repository list --organization "{{ORG}}" |grep Id'
@@ -36,11 +36,9 @@
   shell: hammer --output cve content-view list --organization "{{ORG}}" --name  "{{CONTENT_VIEW_NAME}}" |grep "Repository IDs"
   register: content_view_repos_list
 
-- debug: var=content_view_repos_list.stdout_lines
-
-- name: Create facts with list existing repos in content view 
-  set_fact: 
-    content_view_repos_exist: "{{ content_view_repos_exist + [item}}"
+- name: Create facts with list existing repos in content view
+  set_fact:
+    content_view_repos_exist: "{{ content_view_repos_exist + [item.lstrip(' ')]}}"
   loop: "{{ content_view_repos_list.stdout_lines[0].split(':')[1].split(',') }}"
 
 - name: list existing repos in content view 
@@ -57,11 +55,12 @@
     - satellite_configuration
     - content-view
 
-# - name: Publishing content-view
-#   shell: hammer content-view publish
-#       --organization "{{ORG}}"
-#       --name "{{CONTENT_VIEW_NAME}}"
-#       --async
-#   tags: 
-#     - satellite_configuration
-#     - content-view
+- name: Publishing content-view
+  shell: hammer content-view publish
+      --organization "{{ORG}}"
+      --name "{{CONTENT_VIEW_NAME}}"
+      --async
+  ignore_errors: yes
+  tags: 
+    - satellite_configuration
+    - content-view
