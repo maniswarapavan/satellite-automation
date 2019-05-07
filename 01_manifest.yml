@@ -8,12 +8,11 @@
     - manifest
 
 - name: Copying and uploading Menifest
-  block:      
-  when: subscription_list.stdout_lines.2.split(":").1.lstrip(' ') != SUBSCRIPTION_NAME
+  when: subscription_list.stdout_lines.2.split(":").1.lstrip(' ') != SUBSCRIPTION_NAME     
   tags:
     - satellite_configuration
     - manifest
-
+  block: 
     - name: Copy manifest
       copy:
         src: ./files/{{ MANIFEST_FILE }} 
