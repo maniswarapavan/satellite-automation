@@ -10,6 +10,7 @@ repos_added: []
 content_view_exist: []
 content_view_repos_exist: []
 sub_repos_name_exist: []
+list_of_exist_activation_key: []
 #####################################
 satellite_repository:
   - organization: "{{ORG}}"

@@ -3,17 +3,20 @@
   shell: hammer --output cve activation-key list --organization {{ORG}} |grep Name
   register: activation_key_list
 
-- name: Creating fact from Name list of existing Activation Keys
+- name: Creating fact list from Name of existing Activation Keys
   set_fact:
-    activation_key_exist:
-  loop: "{{activation_key_list}}"
-  loop: 
+    list_of_exist_activation_key: "{{ list_of_exist_activation_key + [ item.split(':')[1].lstrip(' ') ] }}"
+  loop: "{{activation_key_list.stdout_lines}}"
+
+- debug: var=list_of_exist_activation_key
+
 - name: Creating Activiation Key
   shell:  hammer activation-key create 
       --organization "{{ORG}}"
       --name "{{ACTIVATION_KEY_NAME}}"
       --content-view "{{CONTENT_VIEW_NAME}}"
       --lifecycle-environment "{{LIFE_CYCLE_ENV_NAME}}"
+  when: ACTIVATION_KEY_NAME not in list_of_exist_activation_key
   tags:
     - satellite_configuration
     - activationkey
