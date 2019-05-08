@@ -36,12 +36,15 @@
   loop: "{{ list_of_susbscription_in_activation_key.stdout_lines }}"
 
 - debug: var=list_of_existing_subscription_in_activation_key
+
 - name: Adding subscription to Activiation Key
   shell:  hammer activation-key add-subscription
       --organization "{{ORG}}"
       --name "{{ACTIVATION_KEY_NAME}}"
       --subscription-id 1
-  when: 1 not in list_of_existing_subscription_in_activation_key
+  when: item not in list_of_existing_subscription_in_activation_key
+  loop: 
+    - 1
   tags:
     - satellite_configuration
     - activationkey
