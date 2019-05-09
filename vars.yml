@@ -6,6 +6,7 @@ CONTENT_VIEW_NAME: "Test1 Content View"
 ACTIVATION_KEY_NAME: "Test1key"
 LIFE_CYCLE_ENV_NAME: "Library"
 ############ Custom facts ###########
+list_of_existing_subscriptions: []
 repos_added: []
 content_view_exist: []
 content_view_repos_exist: []
