@@ -7,6 +7,7 @@
   tags:
     - satellite_configuration
     - manifest
+- debug: var=subscription_list
 
 - name: Creating list fact of existing subscriptions
   set_fact:
