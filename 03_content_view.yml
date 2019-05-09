@@ -1,9 +1,9 @@
 ---
-- name: Fetching list of available Content-Views name
+- name: Fetching list of names available in Content-Views
   shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
   register: content_view_list
 
-- name: Creating custom fact from list of available Content-Views name
+- name: Creating list fact of names available in Content-Views
   set_fact: 
     content_view_exist: "{{ content_view_exist + [item.split(':')[1].lstrip(' ')]}}"
   loop: "{{content_view_list.stdout_lines}}"
@@ -18,14 +18,15 @@
     - satellite_configuration
     - content-view
 #######################################
-- name: Fetching enabled Repo IDs list from subscription of {{ORG}}
+
+- name: Fetching list of enabled Repo IDs from subscription 
   shell:  'hammer --output cve  repository list --organization "{{ORG}}" |grep Id'
   register: repo_list
   tags: 
     - satellite_configuration
     - content-view
 
-- name: Creating fact with enabled Repo IDs list from subscription of {{ORG}}
+- name: Creating list fact of enabled Repo IDs from subscription 
   set_fact:
     sub_repos_name_exist: "{{ sub_repos_name_exist + [ item.split(':')[1].lstrip(' ')] }}"
   loop: "{{repo_list.stdout_lines}}"
@@ -34,11 +35,11 @@
 #   debug: var=sub_repos_name_exist
 ######################################
 
-- name: Fetching existing Repository IDs list from Content-View
+- name: Fetching list of existing Repository IDs from Content-View
   shell: hammer --output cve content-view list --organization "{{ORG}}" --name  "{{CONTENT_VIEW_NAME}}" |grep "Repository IDs"
   register: content_view_repos_list
 
-- name: Creating facts with existing Repository IDs list from Content-View
+- name: Creating list fact of existing Repository IDs from Content-View
   set_fact:
     content_view_repos_exist: "{{ content_view_repos_exist + [item.lstrip(' ')]}}"
   loop: "{{ content_view_repos_list.stdout_lines[0].split(':')[1].split(',') }}"
@@ -56,6 +57,17 @@
   tags: 
     - satellite_configuration
     - content-view
+#######################
+- name: Fetching list of published versions of Content-View
+  shell: hammer --output cve content-view version list --organization "Default Organization" --content-view "Test1 Content View" |grep Version
+  register: published_versions
+
+- name: Creating facts list of published versions of Content-View
+  set_fact:
+    published_content_view_versions: "{{ published_content_view_versions = [  item.split(':')[1].strip(' ') | int  ] }}"
+  loop: "{{ published_versions.stdout_lines }} "
+
+
 
 - name: Publishing content-view
   shell: hammer content-view publish
@@ -63,6 +75,7 @@
       --name "{{CONTENT_VIEW_NAME}}"
       --async
   ignore_errors: yes
+  when: published_content_view_versions !> 0
   tags: 
     - satellite_configuration
     - content-view
