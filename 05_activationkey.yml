@@ -32,7 +32,7 @@
 
 - name: Creating fact list of subscription ID from existing Activation-Keys 
   set_fact:
-    list_of_existing_subscription_in_activation_key: "{{ list_of_existing_subscription_in_activation_key + [ item.split(':')[1].strip(' ')  ] }}"
+    list_of_existing_subscription_in_activation_key: "{{ list_of_existing_subscription_in_activation_key + [ item.split(':')[1].strip(' ') | int  ] }}"
   loop: "{{ list_of_susbscription_in_activation_key.stdout_lines }}"
 
 - debug: var=list_of_existing_subscription_in_activation_key
@@ -42,9 +42,8 @@
       --organization "{{ORG}}"
       --name "{{ACTIVATION_KEY_NAME}}"
       --subscription-id 1
-  when: item not in list_of_existing_subscription_in_activation_key
-  loop: 
-    - 1
+  when: 1 not in list_of_existing_subscription_in_activation_key
+
   tags:
     - satellite_configuration
     - activationkey
