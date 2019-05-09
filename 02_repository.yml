@@ -3,6 +3,7 @@
 - name: Fetching enabled Repos Name list from subscription of {{ORG}}
   shell: hammer --output cve  repository list --organization "{{ORG}}" |grep Name
   register: repo_name
+  ignore_errors: yes
            
 - name: Creating fact from enabled Repos Name list from subscription of {{ORG}} 
   set_fact:

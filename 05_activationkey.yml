@@ -1,6 +1,7 @@
 ---
 - name: Fetching Name list of existing Activation Keys
   shell: hammer --output cve activation-key list --organization "{{ORG}}"  |grep Name
+  ignore_errors: yes
   register: activation_key_list
 
 - name: Creating fact list from Name of existing Activation Keys
@@ -28,6 +29,7 @@
     activation-key subscriptions 
     --organization "{{ORG}}" 
     --name "{{ACTIVATION_KEY_NAME}}" |grep ID
+  ignore_errors: yes
   register: list_of_susbscription_in_activation_key
 
 - name: Creating fact list of subscription ID from existing Activation-Keys 

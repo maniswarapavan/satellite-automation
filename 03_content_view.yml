@@ -2,6 +2,7 @@
 - name: Fetching list of names available in Content-Views
   shell: hammer --output cve content-view list --organization "{{ORG}}" |grep Name
   register: content_view_list
+  ignore_errors: yes
 
 - name: Creating list fact of names available in Content-Views
   set_fact: 
@@ -21,6 +22,7 @@
 
 - name: Fetching list of enabled Repo IDs from subscription 
   shell:  'hammer --output cve  repository list --organization "{{ORG}}" |grep Id'
+  ignore_errors: yes
   register: repo_list
   tags: 
     - satellite_configuration
@@ -37,6 +39,7 @@
 
 - name: Fetching list of existing Repository IDs from Content-View
   shell: hammer --output cve content-view list --organization "{{ORG}}" --name  "{{CONTENT_VIEW_NAME}}" |grep "Repository IDs"
+  ignore_errors: yes
   register: content_view_repos_list
 
 - name: Creating list fact of existing Repository IDs from Content-View
@@ -60,6 +63,7 @@
 #######################
 - name: Fetching list of published versions of Content-View
   shell: hammer --output cve content-view version list --organization "Default Organization" --content-view "Test1 Content View" |grep Version
+  ignore_errors: yes
   register: published_versions
 
 - name: Creating facts list of published versions of Content-View
