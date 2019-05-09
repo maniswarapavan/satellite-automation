@@ -64,7 +64,7 @@
 
 - name: Creating facts list of published versions of Content-View
   set_fact:
-    published_content_view_versions: "{{ published_content_view_versions = [  item.split(':')[1].strip(' ') | int  ] }}"
+    published_content_view_versions: "{{ published_content_view_versions + [  item.split(':')[1].strip(' ') | int  ] }}"
   loop: "{{ published_versions.stdout_lines }} "
 
 
@@ -75,7 +75,7 @@
       --name "{{CONTENT_VIEW_NAME}}"
       --async
   ignore_errors: yes
-  when: published_content_view_versions !> 0
+  when: published_content_view_versions | length == 0
   tags: 
     - satellite_configuration
     - content-view
